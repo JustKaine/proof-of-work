@@ -207,120 +207,119 @@ _KB: dict[str, dict[str, Any]] = {
     },
     "resume_types": {
         "answer": (
-            "Four resume profiles are supported:\n\n"
-            "  tech       — Software engineers, architects, DevOps, data engineers.\n"
-            "               Emphasises platform depth, automation, and technical systems.\n\n"
-            "  non_tech   — Business, operations, HR, finance, sales roles.\n"
-            "               Emphasises outcomes, stakeholder management, and collaboration.\n\n"
-            "  hybrid     — Product managers, engineering managers, technical leads.\n"
-            "               Balances technical credibility with business impact.\n\n"
-            "  executive  — VPs, Directors, C-suite targeting board/org-level roles.\n"
-            "               Emphasises org-level strategy, governance, and portfolio impact.\n\n"
-            "Pass resume_type to any tool call; the server will auto-select a profile "
-            "if you omit it, based on the job description and your resume content."
-        ),
-        "related_topics": ["workflow", "file_naming", "policies"],
-        "include_workspace": False,
-    },
-    "file_naming": {
-        "answer": (
-            "Naming conventions used by this MCP server:\n\n"
-            "  JD files:          company-role-YYYY-MM.md    e.g. acme-sre-2026-03.md\n"
-            "  Tailored folders:  company-role-YYYY.MM       e.g. acme-sre-2026.03/\n"
-            "  Default resume:    resume.md\n"
-            "  Master profile:    source/master-profile.md\n\n"
-            "Suggested subfolders inside each tailored output folder:\n"
-            "  v1/         First iteration of the tailored resume\n"
-            "  brief/      Single-page condensed version\n"
-            "  detailed/   Multi-page expanded version\n"
-            "  exec/       Executive / board-level version\n\n"
-            "The server's suggest_output_path() generates this structure automatically; "
-            "draft_resume and analyze_jd both return it in workspace_setup."
-        ),
-        "related_topics": ["folder_structure", "workflow"],
-        "include_workspace": False,
-    },
-    "workflow": {
-        "answer": (
-            "The 4-step workflow:\n\n"
-            "  1. analyze_jd    — Paste 1–3 job descriptions; get prioritised requirements.\n"
-            "  2. map_resume    — Pass your master profile + requirements; get gap analysis.\n"
-            "  3. draft_resume  — Generate a tagged draft with verification questions.\n"
-            "  4. finalize      — Resolve all [USER-VERIFY] items, then produce final output.\n\n"
-            "finalize is blocked until:\n"
-            "  • unresolved_verification_count == 0\n"
-            "  • analyze_jd has been run in this session (has_quick_match flag)\n\n"
-            "Each tool response includes interactive questions and suggestions "
-            "that the LLM relays to you to gather missing detail."
-        ),
-        "related_topics": ["tools", "verification_tags", "policies"],
-        "include_workspace": False,
-    },
-    "tools": {
-        "answer": (
-            "Available MCP tools:\n\n"
-            "  analyze_jd\n"
-            "    Input:  job_descriptions (list, 1–3), target_level, role_focus,\n"
-            "            resume_type, audience\n"
-            "    Output: requirements, must_have, nice_to_have, selected_profile,\n"
-            "            workspace_setup, interactive\n\n"
-            "  map_resume\n"
-            "    Input:  resume_text, requirements, master_profile, resume_type, audience\n"
-            "    Output: matches, partials, missing, domain_shift_score, selected_profile,\n"
-            "            interactive\n\n"
-            "  draft_resume\n"
-            "    Input:  resume_source, mapping_result, target_role, target_company,\n"
-            "            resume_type, audience, output_format\n"
-            "    Output: resume_draft, evidence_log (tagged claims), verification_questions,\n"
-            "            workspace_setup, suggested_path, interactive\n\n"
-            "  finalize\n"
-            "    Input:  resume_draft, verification_answers, unresolved_verification_count\n"
-            "    Output: status (finalized|blocked), resume_final, blocked_reasons\n\n"
-            "  faq\n"
-            "    Input:  question (string), context (optional object)\n"
-            "    Output: answer, topic, related_topics,\n"
-            "            workspace_setup (populated for folder/workspace questions)"
-        ),
-        "related_topics": ["workflow", "verification_tags", "policies"],
-        "include_workspace": False,
-    },
-    "verification_tags": {
-        "answer": (
-            "Every claim in a generated resume is tagged to show its confidence level:\n\n"
-            "  [VERIFIED]     Directly supported by evidence in your resume text.\n"
-            "  [INFERRED]     Reasonably inferred from adjacent or related experience.\n"
-            "  [STRETCH]      Plausible claim that needs your explicit confirmation.\n"
-            "  [USER-VERIFY]  Must be confirmed by you; finalize is blocked\n"
-            "                 until all USER-VERIFY items are resolved.\n\n"
-            "When answering verification questions, provide one of these status values\n"
-            "for each item: 'verified', 'rejected', or 'deferred'."
-        ),
-        "related_topics": ["workflow", "policies", "tools"],
-        "include_workspace": False,
-    },
-    "policies": {
-        "answer": (
-            "Policy rules enforced by the server (P0–P4):\n\n"
-            "  P0 Truth Safety    — No fabrication; every claim must carry a provenance tag.\n"
-            "                       Proficiency levels not in your resume are blocked.\n\n"
-            "  P1 Verification    — Soft-stop gate on finalize if unresolved claims remain.\n"
-            "                       Profile consistency is checked across tool calls.\n\n"
-            "  P2 Workflow Order  — Two-stage flow required: analyze_jd must run before\n"
-            "                       finalize. Domain-shift alert if score >= 0.35.\n\n"
-            "  P3 Quality         — Bullets must follow Action + Context + Result format.\n"
-            "                       Seniority alignment and profile-specific signals enforced.\n\n"
-            "  P4 ATS Format      — No markdown tables/images in final output.\n"
-            "                       Sections must match the selected profile.\n\n"
-            "Policy violations either block the tool call (hard stop) or return a\n"
-            "'blocked' status with reasons listed in blocked_reasons (soft stop)."
-        ),
-        "related_topics": ["verification_tags", "workflow", "tools"],
-        "include_workspace": False,
-    },
-    "master_profile": {
-        "answer": (
-            "Your master profile (source/master-profile.md) is the foundation for every\n"
-            "tailored resume. It should be your comprehensive 'everything' document —\n"
+            _README_CONTENT = """
+            # README — Resume Workspace
+
+            ## Folder Structure
+
+            ```
+            📁 resume-workspace/
+            ├── source/                     ← Your base resumes and master profile
+            │   ├── master-profile.md       ← Comprehensive "everything" resume (used in map_resume)
+            │   ├── resume-tech.md          ← Tech-focused base resume
+            │   ├── resume-hybrid.md        ← Hybrid base resume
+            │   └── resume-executive.md     ← Executive base resume
+            ├── job-descriptions/           ← One file per job description
+            │   ├── template.md             ← Copy this for each new JD
+            │   ├── company-role-YYYY-MM.txt← Recommended: plain text is easiest
+            │   └── company-role-YYYY-MM.md ← Also supported
+            ├── tailored/                   ← One subfolder per job application
+            │   └── company-role-YYYY-MM/
+            │       ├── jd-analysis.md      ← Output from analyze_jd
+            │       ├── mapping.md          ← Output from map_resume
+            │       ├── draft.md            ← Output from draft_resume
+            │       └── final.md            ← Output from finalize
+            └── archive/
+                └── old-resumes/            ← Previous versions for reference
+            ```
+
+            ## Workflow
+
+            1. Fill out `source/master-profile.md` with all your experience.
+            2. Add a job description file under `job-descriptions/` (plain text `.txt` is easiest, but `.md` is also supported).
+            3. Run `analyze_jd` on the JD file.
+            4. Run `map_resume` with your master profile + JD analysis output.
+            5. Run `draft_resume` to generate the tailored resume draft.
+            6. Answer all verification questions surfaced by `draft_resume`.
+            7. Run `finalize` to produce the final output (blocked until all [USER-VERIFY] items are resolved).
+            8. Save all outputs in a new `tailored/company-role-YYYY-MM/` folder.
+
+            For full usage guidance, example prompts, and user instructions, see the root [USE_README.md](../USE_README.md).
+
+            ## Resume Types
+
+            | Type        | Best For                                                         |
+            | ----------- | ---------------------------------------------------------------- |
+            | `tech`      | Software engineers, architects, DevOps, data engineers           |
+            | `non_tech`  | Business, operations, HR, finance, sales roles                   |
+            | `hybrid`    | Product managers, engineering managers, technical leads          |
+            | `executive` | VPs, Directors, C-suite targeting board/org-level roles          |
+
+            Pass `resume_type` to any tool call. The server will auto-select a profile if you omit it, based on the job description and your resume content.
+
+            ## File Naming Conventions
+
+            - **JD files:** `company-role-YYYY-MM.txt` (recommended) or `.md` — e.g., `acme-sre-2026-03.txt`
+            - **Tailored folders:** `company-role-YYYY.MM` — e.g., `acme-sre-2026.03/`
+            - **Default resume filename:** `resume.md`
+            - **Master profile:** `source/master-profile.md`
+
+            Suggested subfolders inside each tailored output folder:
+
+            | Sub-folder | Purpose                              |
+            | ---------- | ------------------------------------ |
+            | `v1/`      | First iteration of the tailored resume |
+            | `brief/`   | Single-page condensed version        |
+            | `detailed/`| Multi-page expanded version          |
+            | `exec/`    | Executive / board-level version      |
+
+            ## Tools Reference
+
+            | Tool           | Purpose                                                            |
+            | -------------- | ------------------------------------------------------------------ |
+            | `analyze_jd`   | Extract and prioritize requirements from 1–3 job descriptions      |
+            | `map_resume`   | Map resume evidence to JD requirements; score gaps, detect shifts  |
+            | `draft_resume` | Generate a tagged draft with provenance labels and verification Qs |
+            | `finalize`     | Produce the final resume after all verification items are resolved |
+            | `faq`          | Answer questions about folder layout, types, naming, workflow, etc.|
+
+            ## Verification Tags
+
+            Every claim in a generated resume is tagged to show its confidence level:
+
+            | Tag            | Meaning                                                          |
+            | -------------- | --------------------------------------------------------------- |
+            | `[VERIFIED]`   | Directly supported by evidence in your resume text               |
+            | `[INFERRED]`   | Reasonably inferred from adjacent or related experience          |
+            | `[STRETCH]`    | Plausible claim that needs your confirmation                     |
+            | `[USER-VERIFY]`| Must be confirmed by you before `finalize` will unblock          |
+
+            When answering verification questions use status values: `verified` · `rejected` · `deferred`
+
+            ## Policy Rules (P0–P5)
+
+            | Rule | Name              | Effect                                                          |
+            | ---- | ----------------- | -------------------------------------------------------------- |
+            | P0   | Truth Safety      | No fabrication; every claim must carry a provenance tag         |
+            | P1   | Verification Gate | `finalize` is blocked while unresolved [USER-VERIFY] items exist|
+            | P2   | Workflow Order    | `analyze_jd` must run before `finalize`; domain-shift alerting  |
+            | P3   | Quality           | Action + Context + Result bullet format; seniority alignment    |
+            | P4   | ATS Format        | No markdown tables/images in final output; sections match profile|
+            | P5   | User Data Isolation | User-scoped data and profile evidence protections             |
+
+            ## FAQ
+
+            **Q: What folder structure works best to create resumes with this MCP?**
+            Use the `resume-workspace/` layout above: `source/` for base profiles, `job-descriptions/` for each JD (plain text `.txt` is easiest), and `tailored/company-role-YYYY-MM/` for each application's outputs. Ask the `faq` tool with topic *folder_structure* to receive the full workspace_setup object you can save as this README.
+
+            **Q: What types of resumes can be built?**
+            Four profiles — `tech`, `non_tech`, `hybrid`, and `executive` — each emphasising different sections and signal types. See the Resume Types table.
+
+            **Q: How should I name the files I want to use?**
+            JD files: `company-role-YYYY-MM.txt` (recommended) or `.md`. Master profile: `source/master-profile.md`. Output folders: `company-role-YYYY.MM/`. Resumes: `resume.md`.
+
+            For more usage examples, prompts, and user instructions, see the root [USE_README.md](../USE_README.md).
+            """
             "include ALL experience, not just what fits one role.\n\n"
             "Key sections to fill out:\n\n"
             "  Contact           — Name, location, email, LinkedIn, portfolio/GitHub\n"
